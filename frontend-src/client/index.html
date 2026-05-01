@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Pericles Premium UI</title>
+    
+    <!-- ======================================================== -->
+    <!-- DEPENDENCIAS DEL MOTOR ANTIGUO (EN CARPETA /public)      -->
+    <!-- Asegúrate de haber copiado estos archivos a la carpeta public/ -->
+    <!-- ======================================================== -->
+    <script src="/config.js"></script>
+    <script src="/config.local.js"></script>
+    <script src="/theme.js"></script>
+    <script src="/matrix.js"></script>
+  </head>
+
+  <body>
+    <!-- ======================================================== -->
+    <!-- 1. TU FRONTEND PREMIUM EN REACT (VITE)                   -->
+    <!-- Esto es lo único que verá el abogado y el cliente.       -->
+    <!-- ======================================================== -->
+    <div id="root"></div>
+
+    <!-- ======================================================== -->
+    <!-- 2. EL "MOTOR FANTASMA" DE MUMBLE (100% INVISIBLE)        -->
+    <!-- Todo esto existe para que index.js no colapse, pero      -->
+    <!-- los estilos css aseguran que nadie lo vea en pantalla.   -->
+    <!-- ======================================================== -->
+    <div id="mumble-engine" style="position: absolute; left: -9999px; top: -9999px; visibility: hidden; width: 1px; height: 1px; overflow: hidden; pointer-events: none; opacity: 0;">
+      
+      <div class="loading-container" data-bind="css: { loaded: true }">
+        <div class="loading-circle" data-bind="css: { loaded: true }"></div>
+      </div>
+      
+      <div id="container" data-bind="visible: true, css: { minimal: minimalView }">
+        
+        <!-- Tarjeta de conexión original oculta -->
+        <!-- ko with: connectDialog --> 
+        <div class="connect-dialog dialog" data-bind="visible: visible() && !joinOnly()">
+            <form data-bind="submit: connect">
+              <input id="username" type="text" data-bind="value: username">
+              <!-- El botón oculto que React presionará: -->
+              <button id="connect-dialog_controls_connect" type="submit">Connect</button> 
+            </form>
+        </div>
+        <!-- /ko -->
+
+        <!-- Diálogos secundarios obligatorios para Knockout.js -->
+        <!-- ko with: addChannelDialog -->
+        <div class="add-channel-dialog dialog" data-bind="visible: visible()">
+          <form data-bind="submit: addchannel"><input id="channelName" type="text" data-bind="value: channelName" required></form>
+        </div>
+        <!-- /ko -->
+        <!-- ko with: connectDialog -->
+        <div class="join-dialog dialog" data-bind="visible: visible() && joinOnly()">
+            <form data-bind="submit: connect"><input type="submit" value="Join Conference"></form>
+        </div>
+        <!-- /ko -->
+        
+        <!-- Barra de herramientas oculta (React activará estos botones) -->
+        <div class="toolbar" data-bind="css: { 'toolbar-horizontal': toolbarHorizontal(), 'toolbar-vertical': !toolbarHorizontal() }">
+          <img class="tb-mute" id="hidden-mute-btn" data-bind="visible: !selfMute(), click: function () { requestMute(thisUser()) }" src="/8f75583a16890ab851fc3f121fc63f89.svg">
+          <img class="tb-unmute tb-active" id="hidden-unmute-btn" data-bind="visible: selfMute, click: function () { requestUnmute(thisUser()) }" src="/f54b0be1d559b03ad8d945e988ec8ed4.svg">
+        </div>
+
+        <div class="chat">
+            <!-- Plantillas obligatorias para el log -->
+            <script type="text/html" id="log-generic"><span data-bind="text: value"></span></script>
+            <script type="text/html" id="log-welcome-message"><span data-bind="html: message"></span></script>
+            <script type="text/html" id="log-chat-message"><span data-bind="html: message"></span></script>
+            <script type="text/html" id="log-chat-message-self"><span data-bind="html: message"></span></script>
+            <script type="text/html" id="log-disconnect"></script>
+        </div>
+
+        <!-- Plantilla obligatoria para renderizar usuarios -->
+        <script type="text/html" id="channel">
+          <div class="channel" data-bind="click: $root.select, css: { currentChannel: users.indexOf($root.thisUser()) !== -1 }">
+            <!-- ko foreach: users -->
+            <div class="user" data-bind="click: $root.select, css: { thisClient: $root.thisUser() === $data }">
+              <div class="user-status" data-bind="attr: { title: state }">
+                <img class="user-self-mute" data-bind="visible: selfMute" src="/9171288d67adc4805412883901d2f180.svg">
+              </div>
+              <!-- ko ifnot: show_avatar() -->
+              <img class="user-talk user-talk-off" id="hidden-talk-off" data-bind="visible: talking() == 'off'" src="/a65db861eecb8dcc62ad70fec489da3f.svg">
+              <img class="user-talk user-talk-on" id="hidden-talk-on" data-bind="visible: talking() == 'on'" src="/32785c1d21b0050be9168487542b8c3d.svg">
+              <!-- /ko -->
+              <div class="user-name" data-bind="text: name"></div>
+            </div>
+            <!-- /ko -->
+          </div>
+        </script>
+
+        <div class="channel-root-container" data-bind="if: root, visible: !minimalView()">
+          <div class="channel-root" data-bind="template: {name: 'channel', data: root}"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3. CARGA DE SCRIPTS FINALES                              -->
+    <!-- ======================================================== -->
+    
+    <!-- El script pesado del motor de audio (DEBE IR ANTES DE REACT) -->
+    <script src="/index.js"></script>
+    
+    <!-- Scripts de Vite/React y Analytics de tu proyecto[cite: 7] -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

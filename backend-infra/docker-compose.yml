@@ -1,0 +1,24 @@
+services:
+  # 1. Tu Motor de Audio Local
+  mumble-server:
+    image: mumblevoip/mumble-server:latest
+    container_name: pericles-murmur
+    restart: unless-stopped
+    environment:
+      - MUMBLE_SUPERUSER_PASSWORD=AdminPericles2026
+
+  # 2. La Interfaz Web (Que ahora hará todo el trabajo de proxy interno)
+  mumble-web:
+    image: rankenstein/mumble-web:latest
+    container_name: pericles-web-ui
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    environment:
+      - MUMBLE_SERVER=pericles-murmur:64738
+      - THEME=dark
+    volumes:
+      # AQUÍ ESTÁ LA MAGIA: Conectamos tu carpeta local al servidor web del contenedor
+      - ./frontend-pericles:/home/node/dist
+    depends_on:
+      - mumble-server
